@@ -2,9 +2,12 @@ import math
 
 
 def get_history():
-    open("CalHistory.txt", "a").close()
-    with open("CalHistory.txt", "r") as file:
-        return [line.strip() for line in file.readlines()]
+    try:
+        open("CalHistory.txt", "a").close()
+        with open("CalHistory.txt", "r") as file:
+            return [line.strip() for line in file.readlines()]
+    except FileNotFoundError:
+        return []  # if don't have a file return an empty list.
 
 
 def clear_history():
@@ -17,8 +20,9 @@ def show_menu():
     print("1. Standard Calculator")
     print("2. View History")
     print("3. Clear History")
-    print("4. Exit")
-    choice = input("Select an option (1-4): ")
+    print("4. Help")
+    print("5. Exit")
+    choice = input("Select an option (1-5): ")
     return choice
 
 
@@ -47,15 +51,26 @@ def calculate(num1, operator, num2=None):
         return num1 / num2 if num2 != 0 else "DIVISION_BY_ZERO!"
 
 
-print("Welcome to Fericulate!")
+print("Welcome to Fericultor!")
 
 
 while True:
     choice = show_menu()
 
-    if choice == "4":
-        print("Thank you for using Fericulate. Goodbye!")
+    if choice == "5":
+        print("Thank you for using Fericulator. Goodbye!")
         break
+
+    if choice == "4":
+        print("\n" + "*"*30)
+        print("      FERICULTOR HELP")
+        print("*"*30)
+        print("- Standard: 10 + 20 =")
+        print("- Square Root: sqrt 144 =")
+        print("- Supported: +, -, *, /, //, %, **, sqrt")
+        print("- Type 'back' inside calculator to return to menu.")
+        print("*"*30)
+        input("\nPress Enter to return...")
 
     if choice == "3":
         print("do you want to clear calculation history? (y/n): ")
@@ -78,37 +93,42 @@ while True:
                 print(f"- {item}")
 
     elif choice == "1":
+
+        print("\n(Example: '5 + 3 =' or 'sqrt 16 =') - Type 'back' to return")
+        user_expr = input("Enter your calculation: ").strip().lower()
+
+        if user_expr == "back":  # return to main menu
+            continue
+
+        parts = user_expr.split()
+
         try:
-            n1 = float(input("please enter your first number: "))
+            if not parts:
+                print("Error: Please enter something!")
+                continue
 
-            while True:
-                op = input(
-                    "select one of those opereator. (+, -, *, /, **, %, //, sqrt): ").strip().lower()
+            if parts[0] == "sqrt":
+                n1 = float(parts[1])
+                result = calculate(n1, "sqrt")
+                full_record = f"sqrt {n1} = {result}"
+                print(f"sqrt {n1} = {result}")
 
-                if op not in ["+", "-", "*", "/", "**", "%", "//", "sqrt"]:
-                    print("select an operator from the list.")
-                    print("invalid operator. please try again.")
-                    continue
+            elif len(parts) >= 3:
+                n1 = float(parts[0])
+                op = parts[1]
+                n2 = float(parts[2])
+                result = calculate(n1, op, n2)
+                full_record = f"{n1} {op} {n2} = {result}"
+            else:
+                print("Error: Incomplete expression.")
+                continue
 
-                if op == "sqrt":
-                    result = calculate(n1, op)
-                    full_record = f"sqrt {n1} = {result}"
-                    print(f"sqrt {n1} = {result}")
+            print(f"\n result = {full_record}")
 
-                else:
-                    n2 = float(input("enter your sec number: "))
-                    result = calculate(n1, op, n2)
-                    print(f"{n1} {op} {n2} = {result}")
-                    full_record = f"{n1} {op} {n2} = {result}"
+            with open("CalHistory.txt", "a") as file:
+                file.write(full_record + "\n")
 
-                print(f"\n result = {full_record}")
-
-                with open("CalHistory.txt", "a") as file:
-                    file.write(full_record + "\n")
-
-                break
-
-        except ValueError:
-            print("please enter a valid number or operator.")
+        except (ValueError, IndexError):
+            print("Error: Please follow the format 'num1 op num2' or 'sqrt num'.")
     else:
         print("invalid menu option.")
