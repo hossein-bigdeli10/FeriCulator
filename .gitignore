@@ -16,5 +16,4 @@ ENV/
 .vscode/
 .idea/
 
-# Local history file 
-# CalHistory.json
+venv/
